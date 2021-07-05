@@ -20,9 +20,9 @@ def get_movie_link(url):
 
     return movie_links_list
 
-url = 'http://movie.naver.com/movie/point/af/list.nhn'
-movie_links = get_movie_link(url)
-print(movie_links)
+# url = 'http://movie.naver.com/movie/point/af/list.nhn'
+# movie_links = get_movie_link(url)
+# print(movie_links)
 
 # 2. 영화 접속후 
 res = requests.get('https://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=189050&target=after')
@@ -42,8 +42,8 @@ def genre_link(url):
 
     return genre_list
 
-url = 'http://movie.naver.com/movie/point/af/list.nhn'
-genre_link_data = genre_link(url)
+# url = 'http://movie.naver.com/movie/point/af/list.nhn'
+# genre_link_data = genre_link(url)
 # print(genre_link_data)
 
 ## naver 영화에서 평가등을 한 유저 정보 가져오기
@@ -70,3 +70,35 @@ def get_user_list(url):
 # url = "http://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=189120&target=after&page=1"
 # point_data = get_user_list(url)
 # print(point_data)
+
+def do_crawl(url):
+    url_list = get_user_list(url)
+
+    if len(url_list) >=2:
+        for url in url_list:
+            # genre_list = genre_list(url)
+
+            res = requests.get(url)
+            content = res.text
+            soup = BeautifulSoup(content, ' html5lib')
+
+            user_id = soup.find_all('a',class_='author')
+            title = soup.find_all('td',class_='title')
+            score = soup.find_all('td', class_='point')
+
+            user_id_list = []
+            for user_id in user_id:
+                replaced_user_id = re.sub(r'[*]', user_id.get_text())
+                user_id_list.append(replaced_user_id)
+
+            title_list = []
+            for title_1 in title:
+                title_list.append(title_1.a.get_text())
+
+            score_list = []
+            for score_1 in score:
+                score_list.append(score_1.a.get_text())
+
+            print(user_id_list, title_list, score_list)
+
+do_crawl('https://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=189050&target=after')
